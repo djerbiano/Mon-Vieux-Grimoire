@@ -1,0 +1,8 @@
+# dependencies
+/node_modules
+
+# production
+.env
+
+# debug logs
+npm-debug.log*
