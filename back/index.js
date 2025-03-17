@@ -4,6 +4,7 @@ const cors = require("cors");
 const logger = require("./middlewares/logger");
 const connectToDatabase = require("./config/db");
 const userRoute = require("./routes/userRoute");
+const bookRoute = require("./routes/bookRoute");
 
 const port = process.env.PORT;
 const server = express();
@@ -34,6 +35,7 @@ server.get("/", (req, res) => {
 
 // Routes
 server.use("/api/auth", userRoute);
+server.use("/api", bookRoute);
 
 // Non-existent endpoints
 server.all("*", (req, res) => {
