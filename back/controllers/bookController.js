@@ -6,6 +6,13 @@ const controllers = {
   // Get all books
   getAllBooks: async (req, res) => {
     try {
+      const books = await Book.find();
+
+      if (books.length === 0) {
+        return res.status(200).json({ data: [] });
+      }
+
+      return res.status(200).json({ data: books });
     } catch (error) {
       handleErrors(res, 400, {
         message: error.message,
@@ -16,6 +23,14 @@ const controllers = {
   // Get book by id
   getBookById: async (req, res) => {
     try {
+      const book = await Book.findById(req.params.id);
+      if (!book) {
+        return handleErrors(res, 400, {
+          message: "Livre non trouvé !",
+        });
+      }
+
+      return res.status(200).json({ data: book });
     } catch (error) {
       handleErrors(res, 400, {
         message: error.message,
