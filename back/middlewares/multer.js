@@ -17,7 +17,21 @@ const storage = multer.memoryStorage();
 // Multer configuration
 const upload = multer({
   storage: storage,
+
   fileFilter: (req, file, cb) => {
+
+    // Check if book data is provided and valid
+    const bookData = JSON.parse(req.body.book);
+    if (
+      !bookData.userId ||
+      !bookData.title ||
+      !bookData.author ||
+      !bookData.year ||
+      isNaN(bookData.year) ||
+      !bookData.genre
+    ) {
+      return cb(new Error("Données du livre incomplètes"), false);
+    }
     if (mimeTypes[file.mimetype]) {
       cb(null, true);
     } else {
@@ -38,8 +52,7 @@ const resizeAndSaveImage = async (req, res, next) => {
 
     try {
       // Unique file name webp
-      const name = req.file.originalname.split(".")[0].split(" ").join("_");
-      const filename = `${name}${Date.now()}.webp`;
+      const filename = `${Date.now()}.webp`;
 
       // Save folder
       const imagesDir = path.join(__dirname, "../images");
@@ -53,7 +66,7 @@ const resizeAndSaveImage = async (req, res, next) => {
       // Delete buffer
       delete req.file.buffer;
 
-      req.imagePath = filename;
+      req.imagePath = `${process.env.API_URL_IMAGES}/${filename}`;
       next();
     } catch (error) {
       next(error);

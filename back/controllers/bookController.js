@@ -9,10 +9,10 @@ const controllers = {
       const books = await Book.find();
 
       if (books.length === 0) {
-        return res.status(200).json({ data: [] });
+        return res.status(200).json([]);
       }
 
-      return res.status(200).json({ data: books });
+      return res.status(200).json(books);
     } catch (error) {
       handleErrors(res, 400, {
         message: error.message,
@@ -30,7 +30,7 @@ const controllers = {
         });
       }
 
-      return res.status(200).json({ data: book });
+      return res.status(200).json(book);
     } catch (error) {
       handleErrors(res, 400, {
         message: error.message,
@@ -41,6 +41,8 @@ const controllers = {
   // Get 3 bestRaiting books
   getBestRaitingBooks: async (req, res) => {
     try {
+      const books = await Book.find().sort({ averageRating: -1 }).limit(3);
+      return res.status(200).json(books);
     } catch (error) {
       handleErrors(res, 400, {
         message: error.message,
@@ -51,6 +53,13 @@ const controllers = {
   // Add new book
   addBook: async (req, res) => {
     try {
+      const bookData = JSON.parse(req.body.book);
+      const book = new Book(bookData);
+      book.imageUrl = req.imagePath;
+      await book.save();
+      return res
+        .status(201)
+        .json({ message: book.title + " a bien été ajouté !" });
     } catch (error) {
       handleErrors(res, 400, {
         message: error.message,
