@@ -67,6 +67,7 @@ const resizeAndSaveImage = async (req, res, next) => {
       delete req.file.buffer;
 
       req.imagePath = `${process.env.API_URL_IMAGES}/${filename}`;
+      req.imageFilename = filename;
       next();
     } catch (error) {
       next(error);

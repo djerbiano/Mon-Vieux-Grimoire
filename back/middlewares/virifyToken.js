@@ -1,7 +1,8 @@
 const jwt = require("jsonwebtoken");
+const { User } = require("../models/Users");
 // const dotenv = require("dotenv").config();
 
-function virifyToken(req, res, next) {
+async function virifyToken(req, res, next) {
   // Get token from header
   let token = req.headers.authorization;
 
@@ -19,6 +20,14 @@ function virifyToken(req, res, next) {
     // Add decoded information to the request
     req.user = decoded;
 
+    // Verify userId
+    const user = await User.findById(decoded._id);
+
+    if (!user) {
+      return res.status(403).json({
+        message: "Utilisateur non trouvé !",
+      });
+    }
     next();
   } catch (error) {
     res.status(401).json({ message: "Token: Erreur lors de la connexion !" });

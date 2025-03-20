@@ -1,6 +1,10 @@
 const Book = require("../models/Books");
 const { User } = require("../models/Users");
-const { handleErrors } = require("../utils/helpers");
+const {
+  handleErrors,
+  deleteImageAndSendErrorMessage,
+  deleteImage,
+} = require("../utils/helpers");
 
 const controllers = {
   // Get all books
@@ -61,6 +65,7 @@ const controllers = {
         .status(201)
         .json({ message: book.title + " a bien été ajouté !" });
     } catch (error) {
+      deleteImage(req.imageFilename);
       handleErrors(res, 400, {
         message: error.message,
       });
@@ -70,7 +75,45 @@ const controllers = {
   // Update book by id
   updateBookById: async (req, res) => {
     try {
+      let book = await Book.findById(req.params.id);
+
+      if (!book) {
+        deleteImage(req.imageFilename);
+        return handleErrors(res, 404, {
+          message: "Livre non trouvé !",
+        });
+      }
+      // Get book data from frontend
+      const bookData = req.body.book ? JSON.parse(req.body.book) : req.body;
+
+      // Check if user is author
+      if (req.user._id !== book.userId.toString()) {
+        deleteImageAndSendErrorMessage(req.imageFilename, res, 403, {
+          message: "Vous ne pouvez pas modifier ce livre !",
+        });
+        return;
+      }
+
+      // Save old image if exists to delete it
+      const oldImage = req.body.book ? book.imageUrl.split("/").pop() : null;
+
+      // Update book fields
+      const fieldsToUpdate = ["title", "author", "year", "genre"];
+      fieldsToUpdate.forEach((field) => {
+        if (bookData[field] !== undefined) book[field] = bookData[field];
+      });
+
+      if (req.imagePath) book.imageUrl = req.imagePath;
+
+      await book.save();
+
+      deleteImage(oldImage);
+
+      return res
+        .status(200)
+        .json({ message: `${book.title} a bien été modifié !` });
     } catch (error) {
+      deleteImage(req.imageFilename);
       handleErrors(res, 400, {
         message: error.message,
       });
