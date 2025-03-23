@@ -123,6 +123,29 @@ const controllers = {
   // Delete book by id
   deleteBookById: async (req, res) => {
     try {
+      const book = await Book.findById(req.params.id);
+      if (!book) {
+        return handleErrors(res, 404, {
+          message: "Livre non trouvé !",
+        });
+      }
+
+      // Check if user is author
+      if (req.user._id !== book.userId.toString()) {
+        return handleErrors(res, 403, {
+          message: "Vous ne pouvez pas supprimer ce livre !",
+        });
+      }
+      // get pictureName to delete it
+      const picture = book.imageUrl ? book.imageUrl.split("/").pop() : null;
+
+      await Book.findByIdAndDelete(req.params.id);
+
+      deleteImage(picture);
+
+      return res
+        .status(200)
+        .json({ message: `Le livre ${book.title} a bien été supprimé !` });
     } catch (error) {
       handleErrors(res, 400, {
         message: error.message,
