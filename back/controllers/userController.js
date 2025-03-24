@@ -59,15 +59,11 @@ const controllers = {
       }
 
       // Check password
-      const validPassword = await bcrypt.compare(
-        req.body.password.trim(),
-        user.password
-      );
+      const validPassword = await bcrypt.compare(req.body.password.trim(), user.password);
 
       if (!validPassword) {
         return handleErrors(res, 400, {
-          message:
-            "Vous avez saisi un mot de passe ou une adresse e-mail incorrect !",
+          message: "Vous avez saisi un mot de passe ou une adresse e-mail incorrect !",
         });
       }
 

@@ -19,17 +19,9 @@ const upload = multer({
   storage: storage,
 
   fileFilter: (req, file, cb) => {
-
     // Check if book data is provided and valid
     const bookData = JSON.parse(req.body.book);
-    if (
-      !bookData.userId ||
-      !bookData.title ||
-      !bookData.author ||
-      !bookData.year ||
-      isNaN(bookData.year) ||
-      !bookData.genre
-    ) {
+    if (!bookData.userId || !bookData.title || !bookData.author || !bookData.year || isNaN(bookData.year) || !bookData.genre) {
       return cb(new Error("Données du livre incomplètes"), false);
     }
     if (mimeTypes[file.mimetype]) {
@@ -58,10 +50,7 @@ const resizeAndSaveImage = async (req, res, next) => {
       const imagesDir = path.join(__dirname, "../images");
 
       // Resize and save image
-      await sharp(req.file.buffer)
-        .resize(800, 800, { fit: "inside", withoutEnlargement: true })
-        .webp({ quality: 80 })
-        .toFile(path.join(imagesDir, filename));
+      await sharp(req.file.buffer).resize(800, 800, { fit: "inside", withoutEnlargement: true }).webp({ quality: 80 }).toFile(path.join(imagesDir, filename));
 
       // Delete buffer
       delete req.file.buffer;

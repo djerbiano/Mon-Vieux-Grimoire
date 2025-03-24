@@ -1,10 +1,6 @@
 const Book = require("../models/Books");
 const { User } = require("../models/Users");
-const {
-  handleErrors,
-  deleteImageAndSendErrorMessage,
-  deleteImage,
-} = require("../utils/helpers");
+const { handleErrors, deleteImageAndSendErrorMessage, deleteImage } = require("../utils/helpers");
 
 const controllers = {
   // Get all books
@@ -61,9 +57,7 @@ const controllers = {
       const book = new Book(bookData);
       book.imageUrl = req.imagePath;
       await book.save();
-      return res
-        .status(201)
-        .json({ message: book.title + " a bien été ajouté !" });
+      return res.status(201).json({ message: book.title + " a bien été ajouté !" });
     } catch (error) {
       deleteImage(req.imageFilename);
       handleErrors(res, 400, {
@@ -109,9 +103,7 @@ const controllers = {
 
       deleteImage(oldImage);
 
-      return res
-        .status(200)
-        .json({ message: `${book.title} a bien été modifié !` });
+      return res.status(200).json({ message: `${book.title} a bien été modifié !` });
     } catch (error) {
       deleteImage(req.imageFilename);
       handleErrors(res, 400, {
@@ -143,9 +135,7 @@ const controllers = {
 
       deleteImage(picture);
 
-      return res
-        .status(200)
-        .json({ message: `Le livre ${book.title} a bien été supprimé !` });
+      return res.status(200).json({ message: `Le livre ${book.title} a bien été supprimé !` });
     } catch (error) {
       handleErrors(res, 400, {
         message: error.message,
@@ -156,6 +146,37 @@ const controllers = {
   // Add rating to book by id
   addRatingToBookById: async (req, res) => {
     try {
+      const book = await Book.findById(req.params.id);
+      if (!book) {
+        return handleErrors(res, 404, {
+          message: "Livre non trouvé !",
+        });
+      }
+
+      // Check if user has already rated this book
+      const ratingExist = book.ratings.find((rating) => rating.userId.toString() === req.user._id);
+
+      if (ratingExist) {
+        return handleErrors(res, 403, {
+          message: "Vous avez déja donné une note pour ce livre !",
+        });
+      }
+      // check if rating is between 0 and 5
+      const rating = req.body.rating;
+      if (rating == null || typeof rating !== "number" || rating < 0 || rating > 5) {
+        return handleErrors(res, 400, { message: "La note doit être un nombre compris entre 0 et 5 !" });
+      }
+
+      // Add rating to book
+      book.ratings.push({ userId: req.user._id, grade: rating });
+
+      // Calculate average rating
+
+      book.averageRating = parseFloat((book.ratings.reduce((acc, rating) => acc + rating.grade, 0) / book.ratings.length).toFixed(2));
+
+      await book.save();
+
+      return res.status(200).json(book);
     } catch (error) {
       handleErrors(res, 400, {
         message: error.message,
