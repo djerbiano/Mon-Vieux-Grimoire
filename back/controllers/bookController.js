@@ -101,7 +101,13 @@ const controllers = {
 
       await book.save();
 
-      deleteImage(oldImage);
+      const imageDeleted = await deleteImage(oldImage);
+
+      if (!imageDeleted) {
+        return handleErrors(res, 200, {
+          message: `Le livre ${book.title} a bien été modifié mais l'image n'a pas pu être supprimée !`,
+        });
+      }
 
       return res.status(200).json({ message: `${book.title} a bien été modifié !` });
     } catch (error) {
@@ -133,7 +139,13 @@ const controllers = {
 
       await Book.findByIdAndDelete(req.params.id);
 
-      deleteImage(picture);
+      const imageDeleted = await deleteImage(picture);
+
+      if (!imageDeleted) {
+        return handleErrors(res, 200, {
+          message: `Le livre ${book.title} a bien été supprimé mais l'image n'a pas pu être supprimée !`,
+        });
+      }
 
       return res.status(200).json({ message: `Le livre ${book.title} a bien été supprimé !` });
     } catch (error) {
@@ -171,7 +183,6 @@ const controllers = {
       book.ratings.push({ userId: req.user._id, grade: rating });
 
       // Calculate average rating
-
       book.averageRating = parseFloat((book.ratings.reduce((acc, rating) => acc + rating.grade, 0) / book.ratings.length).toFixed(2));
 
       await book.save();
