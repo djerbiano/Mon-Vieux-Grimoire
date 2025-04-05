@@ -105,7 +105,7 @@ const controllers = {
 
       if (!imageDeleted) {
         return handleErrors(res, 200, {
-          message: `Le livre ${book.title} a bien été modifié mais l'image n'a pas pu être supprimée !`,
+          message: `Le livre ${book.title} a bien été modifié en gardant l'ancienne image !`,
         });
       }
 

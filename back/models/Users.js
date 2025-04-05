@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const uniqueValidator = require("mongoose-unique-validator");
 const joi = require("joi");
 
 const UserSchema = mongoose.Schema({
@@ -17,6 +18,9 @@ const UserSchema = mongoose.Schema({
     minlength: 5,
   },
 });
+
+// UserSchema.plugin(uniqueValidator, { message: '{PATH} doit être unique.' });
+UserSchema.plugin(uniqueValidator, { message: "doit être unique" });
 
 const User = mongoose.model("User", UserSchema);
 

@@ -6,6 +6,7 @@ const handleErrors = (res, statusCode, message) => {
 };
 
 const deleteImage = async (filename) => {
+  if (!filename) return false;
   const picture = path.resolve(__dirname, "../images", filename);
 
   try {

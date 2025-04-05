@@ -15,11 +15,11 @@ const controllers = {
       }
 
       // Check if email already exists
-      const user = await User.findOne({ email: req.body.email });
-      if (user)
-        return handleErrors(res, 400, {
-          message: "Merci de saisir une autre adresse e-mail",
-        });
+      // const user = await User.findOne({ email: req.body.email });
+      // if (user)
+      //   return handleErrors(res, 400, {
+      //     message: "Merci de saisir une autre adresse e-mail",
+      //   });
 
       // Hash password
       const salt = await bcrypt.genSalt(10);
